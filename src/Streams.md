@@ -37,15 +37,19 @@ Stream<Integer> streamFromStreamIterate = Stream.iterate(1000000, (Integer n) ->
 
 - Implementation of Collector interface that implements reduction operations (accumulating elements into collection, summarize elements according to some criteria)
 
-  |  Operation | Description | Input | Return Type | Example| 
+|  Operation | Description | Input | Return Type | Example| 
 | ------------- | ------------- |------------- |------------- |-------------  |
 | toList() | 	Returns a Collector that accumulates the input elements into a new List. | NA | ? | stream.collect(Collectors.toList())|
 | toSet() | Returns a Collector that accumulates the input elements into a new Set. | NA | ? | stream.collect(Collectors.toSet()) |
-| toMap()| | | | |
-| | | | | |
-| | | | | |
-| | | | | |
-| | | | | |
+| toCollection() | Returns a Collector that accumulates the input elements into a new Collection, in encounter order. | Supplier| Collector | |
+
+
+Following are overloaded methods of toMap which returns a Collector that accumulates elements into a Map whose keys and values are the result of applying the provided mapping functions to the input elements.
+|  Operation | Description | Input | Return Type | Example| 
+| ------------- | ------------- |------------- |------------- |-------------  |
+| toMap()| If the mapped keys contains duplicates (according to Object.equals(Object)), an IllegalStateException is thrown  | Function, Function | Map | stream.collect(Function.identity(), s->s.length())|
+| toMap()| If the mapped keys contains duplicates (according to Object.equals(Object)), the value mapping function is applied to each equal element, and the results are merged using the provided merging function.| Function keyMapper, Function valueMapper, BinaryOperator mergingFunction| ? | stream.collect(Function.identity(), String::length, (s,a)->s+a)|
+
 
 
 # Intermediate operations
@@ -155,4 +159,10 @@ Internally it does:
 - The chars() method is available on String, StringBuffer, and CharBuffer objects. This method returns an IntStream representing the Unicode code points of the characters within the sequence.
 
 
+# Questions 
+- in Java 17 you can use .toList() instead of .collect(Collectors.toList()) on a stream, whats difference (??), difference in Collectors.toCollection() and Collectors.toList()
+ .toList() guarantees the returned List is immutable. However, Collectors.toList() makes no promises about immutability. The result might be immutable. 
+I dint find in stream documentation toList method https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
 
+- Difference in Collectors.counting() and count() which one to use when
+- 
