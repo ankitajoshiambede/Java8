@@ -37,39 +37,54 @@ Stream<Integer> streamFromStreamIterate = Stream.iterate(1000000, (Integer n) ->
 
 - Implementation of Collector interface that implements reduction operations (accumulating elements into collection, summarize elements according to some criteria)
 
-|  Operation | Description | Input | Return Type | Example| 
-| ------------- | ------------- |------------- |------------- |-------------  |
-| toList() | 	Returns a Collector that accumulates the input elements into a new List. | NA | ? | stream.collect(Collectors.toList())|
-| toSet() | Returns a Collector that accumulates the input elements into a new Set. | NA | ? | stream.collect(Collectors.toSet()) |
-| toCollection() | Returns a Collector that accumulates the input elements into a new Collection, in encounter order. | Supplier| Collector | |
-
+|  Operation | Description | Input | Return Type | Example| Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| toList() | 	Returns a Collector that accumulates the input elements into a new List. | NA | ? | stream.collect(Collectors.toList())| |
+| toSet() | Returns a Collector that accumulates the input elements into a new Set. | NA | ? | stream.collect(Collectors.toSet()) | |
+| toCollection() | Returns a Collector that accumulates the input elements into a new Collection, in encounter order. | Supplier| Collector | stream.collect(Collectors.toCollection(()->new TreeSet<String>())| |
+| counting() | Returns a Collector accepting elements of type T that counts the number of input elements.  | NA | Collector accepting elements of type T that counts the number of input elements.  |  stream.collect(Collectors.counting())| |
+| | | | | | | 
+| | | | | | |
 
 Following are overloaded methods of toMap which returns a Collector that accumulates elements into a Map whose keys and values are the result of applying the provided mapping functions to the input elements.
-|  Operation | Description | Input | Return Type | Example| 
-| ------------- | ------------- |------------- |------------- |-------------  |
-| toMap()| If the mapped keys contains duplicates (according to Object.equals(Object)), an IllegalStateException is thrown  | Function, Function | Map | stream.collect(Function.identity(), s->s.length())|
-| toMap()| If the mapped keys contains duplicates (according to Object.equals(Object)), the value mapping function is applied to each equal element, and the results are merged using the provided merging function.| Function keyMapper, Function valueMapper, BinaryOperator mergingFunction| ? | stream.collect(Function.identity(), String::length, (s,a)->s+a)|
+|  Operation | Description | Input | Return Type | Example|  Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| toMap()| If the mapped keys contains duplicates (according to Object.equals(Object)), an IllegalStateException is thrown  | Function, Function | Map | stream.collect(Function.identity(), s->s.length())| |
+| toMap()| If the mapped keys contains duplicates (according to Object.equals(Object)), the value mapping function is applied to each equal element, and the results are merged using the provided merging  function.| Function keyMapper, Function valueMapper, BinaryOperator mergingFunction| ? | stream.collect(Function.identity(), String::length, (s,a)->s+a)| |
 
 
+Following are overloaded methods of joining() which returns a Collector that concatenates the input elements into a String, in encounter order.
+|  Operation | Description | Input | Return Type | Example|  Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| joining() | joins without and delimiter prefix or suffix | NA| | stream.collect(Collector.joining()) | |
+| joining() | separated by the specified delimiter | CharSequence delimeter| | stream.collector(Collector.joining(" , ")) | |
+| joining() | separated by the specified delimiter, with the specified prefix and suffix | CharSequence delimeter, CharSequence prefix, CharSequence suffix| | stream.collect(Collector.joining(" , ", "{", "}"))| |
+
+
+Following are overloaded methods of partitioningBy() which returns a Collector which partitions the input elements according to a Predicate, There are no guarantees on the type, mutability, serializability, or thread-safety of the Map returned.
+|  Operation | Description | Input | Return Type | Example|  Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| partitioningBy() | | Predicate | Collector implementing the partitioning operation | stream.collect(Collectors.partitioningBy(s->s.contains("fruit")));| |
+| partitioningBy() | reduces the values in each partition according to another Collector | Predicate, Collector | Collector implementing the cascaded partitioning operation | stream.collect(Collectors.partitioningBy(s->s.contains("fruit"), Collectors.counting())| |
 
 # Intermediate operations
 - We can chain multitple intermediate operations together 
 
-|  Operation | Description | Input | Return Type | Example| 
-| ------------- | ------------- |------------- |------------- |-------------  |
-| filter()  | Filters the element  | Predicate | Stream |  stream.filter((String) name -> name.length >=5) |
-| map()  | Transform each element | Function | Stream | stream.map((String) name -> name.toLowerCase())|
-|  flatMap() |  Iterate over each element of complex collection(e.g. list of list), and helps to flatten it | Function |Stream |  stream.flatMap(List<String> sentence -> sentence.stream()); // given List<List<String>> stream and it returns Stream<String>|
-|  distinct() |  Removes duplicate elements from stream| NA | Stream | stream.distinct() |
-| sorted()  |Elements sorted according to natural order. | NA | Stream | stream.sorted()|
-| sorted()  | Elements sorted according to provided comparator.| Comparator | Stream | stream.sorted((Integer val1, Integer val2) -> val2-val1 // sorts in desc order)|
-|  limit() |  Truncate the stream, to given limit size | Long | Stream | stream.limit(3) |
-| skip()  |  Skips first given elements of stream | Long | Stream | stream.skip(3) |
-| peek()  | helps see intermediate result of stream which is getting processed  | Consumer| Stream | stream.peek((Integer value)-> System.out.println(val));|
-| mapToObj()  |  Returns an object-valued Stream consisting of the results of applying the given function to the elements of this stream. |IntFunction | Stream | |
-| mapToInt()  |  Returns an IntStream consisting of the results of applying the given function to the elements of this stream. |ToIntFunction | IntStream | |
-| mapToLong()  |  Returns an LongStream consisting of the results of applying the given function to the elements of this stream. |ToLongFunction | LongStream | |
-| mapToDouble()  |  Returns an DoubleStream consisting of the results of applying the given function to the elements of this stream. |ToDoubleFunction | DoubleStream | |
+|  Operation | Description | Input | Return Type | Example|  Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| filter()  | Filters the element  | Predicate | Stream |  stream.filter((String) name -> name.length >=5) | |
+| map()  | Transform each element | Function | Stream | stream.map((String) name -> name.toLowerCase())| |
+|  flatMap() |  Iterate over each element of complex collection(e.g. list of list), and helps to flatten it | Function |Stream |  stream.flatMap(List<String> sentence -> sentence.stream()); // given List<List<String>> stream and it returns Stream<String>| |
+|  distinct() |  Removes duplicate elements from stream| NA | Stream | stream.distinct() | |
+| sorted()  |Elements sorted according to natural order. | NA | Stream | stream.sorted()| |
+| sorted()  | Elements sorted according to provided comparator.| Comparator | Stream | stream.sorted((Integer val1, Integer val2) -> val2-val1 // sorts in desc order)| |
+|  limit() |  Truncate the stream, to given limit size | Long | Stream | stream.limit(3) | |
+| skip()  |  Skips first given elements of stream | Long | Stream | stream.skip(3) | |
+| peek()  | helps see intermediate result of stream which is getting processed  | Consumer| Stream | stream.peek((Integer value)-> System.out.println(val));| |
+| mapToObj()  |  Returns an object-valued Stream consisting of the results of applying the given function to the elements of this stream. |IntFunction | Stream | | |
+| mapToInt()  |  Returns an IntStream consisting of the results of applying the given function to the elements of this stream. |ToIntFunction | IntStream | | |
+| mapToLong()  |  Returns an LongStream consisting of the results of applying the given function to the elements of this stream. |ToLongFunction | LongStream | | |
+| mapToDouble()  |  Returns an DoubleStream consisting of the results of applying the given function to the elements of this stream. |ToDoubleFunction | DoubleStream | | |
 
 ## mapToInt
 Below is one way to create primitive data type stream
@@ -88,22 +103,22 @@ IntStream integerStream = numbers.stream().mapToInt((String val) -> Integer.pars
 - It triggers processing of stream
 - One terminal operation is used on a stream , it is closed/consumed and cannot be used again for other terminal operation
 
-|  Operation | Description | Input | Return Type | Example| 
-| ------------- | ------------- |------------- |------------- |-------------  |
-| forEach()  | performs action for each element  | Consumer| NA | stream.forEach(System.out::println) |
-| toArray()  | collects elements of stream into an array  |NA | Object[]) | Object[] ans = stream.toArray()|
-| toArray()  | collects elements of stream into an array  |IntFunction | A[] where  A is the element type of the resulting array | Person[] men = people.stream().toArray(Person[]::new); Integer[] intArray = numberStream.toArray((int size)-> new Integer[size]);|
-|  reduce() |  does reduction on elements , using provided assosciative aggregation function | BinaryOperator|Optional or value |stream.reduce((Integer val1, Integer val2) -> val1+val2) |
-|  reduce() |  does reduction on elements , using provided assosciative aggregation function and provided identity value| T identity, BinaryOperator|T |stream.reduce(0, Integer::sum) |
-|  collect() | collects element into collection (e.g. list, set)  | Collector | Collection| stream.collect(Collectos.toList())|
-| min()  | find minimum  element in stream based on comparator or natural sorting  | Comparator | Optional | stream.min(Comarator.naturalOrder())|
-|  max() | find maximum element in stream based on comparator or natural sorting   | Comparator | Optional | stream.max(Comparator.comparing(ClassName::methodName))|
-| count()  |  Number of elements present in stream | NA| long| stream.count()|
-| anyMatch()  |  Checks if any value in stream match given predicate  | Predicate| Boolean | stream.anyMatch((Integer val)-> val >3)|
-| allMatch()  |  Checks if all value in stream match given predicate   | Predicate | Boolean | |
-| noneMatch()  | Checks if none value in stream match given predicate    |Predicate | Boolean| |
-| findFirst()  | Find first element of stream | NA|Optional |stream.findFirst() |
-|  findAny() | Returns any element, useful in parallel stream | NA | Optional | stream.findAny() |
+|  Operation | Description | Input | Return Type | Example|    Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| forEach()  | performs action for each element  | Consumer| NA | stream.forEach(System.out::println) | |
+| toArray()  | collects elements of stream into an array  |NA | Object[]) | Object[] ans = stream.toArray()| |
+| toArray()  | collects elements of stream into an array  |IntFunction | A[] where  A is the element type of the resulting array | Person[] men = people.stream().toArray(Person[]::new); Integer[] intArray = numberStream.toArray((int size)-> new Integer[size]);| |
+|  reduce() |  does reduction on elements , using provided assosciative aggregation function | BinaryOperator|Optional or value |stream.reduce((Integer val1, Integer val2) -> val1+val2) | |
+|  reduce() |  does reduction on elements , using provided assosciative aggregation function and provided identity value| T identity, BinaryOperator|T |stream.reduce(0, Integer::sum) | |
+|  collect() | collects element into collection (e.g. list, set)  | Collector | Collection| stream.collect(Collectos.toList())| |
+| min()  | find minimum  element in stream based on comparator or natural sorting  | Comparator | Optional | stream.min(Comarator.naturalOrder())| |
+|  max() | find maximum element in stream based on comparator or natural sorting   | Comparator | Optional | stream.max(Comparator.comparing(ClassName::methodName))| |
+| count()  |  Number of elements present in stream | NA| long| stream.count()| |
+| anyMatch()  |  Checks if any value in stream match given predicate  | Predicate| Boolean | stream.anyMatch((Integer val)-> val >3)| |
+| allMatch()  |  Checks if all value in stream match given predicate   | Predicate | Boolean | | |
+| noneMatch()  | Checks if none value in stream match given predicate    |Predicate | Boolean| | |
+| findFirst()  | Find first element of stream | NA|Optional |stream.findFirst() | |
+|  findAny() | Returns any element, useful in parallel stream | NA | Optional | stream.findAny() | |
 
 ## collect()
 
