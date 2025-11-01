@@ -67,6 +67,17 @@ Following are overloaded methods of partitioningBy() which returns a Collector w
 | partitioningBy() | | Predicate | Collector implementing the partitioning operation | stream.collect(Collectors.partitioningBy(s->s.contains("fruit")));| |
 | partitioningBy() | reduces the values in each partition according to another Collector | Predicate, Collector | Collector implementing the cascaded partitioning operation | stream.collect(Collectors.partitioningBy(s->s.contains("fruit"), Collectors.counting())| |
 
+
+
+Following are overloaded methods of groupingBy() which returns a Collector implementing a "group by" operation on input elements , grouping elements according to a classification functio , There are no guarantees on the type, mutability, serializability, or thread-safety of the Map returned.
+
+|  Operation | Description | Input | Return Type | Example|  Output|
+| ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| groupingBy() | | | | | 
+| groupingBy() | implementing a cascaded "group by" operation on input elements, grouping elements according to a classification function, and then performing a reduction operation on the values associated with a given key using the specified downstream Collector. | Function, Collector | | |
+| groupingBy() |  implementing a cascaded "group by" operation on input elements, grouping elements according to a classification function, and then performing a reduction operation on the values associated with a given key using the specified downstream Collector. The Map produced by the Collector is created with the supplied factory function. | Function, Supplier, Collector | | stream().collect(groupingBy(Person::getCity, TreeMap::new,
+                                              mapping(Person::getLastName, toSet())) |
+
 # Intermediate operations
 - We can chain multitple intermediate operations together 
 
@@ -85,6 +96,7 @@ Following are overloaded methods of partitioningBy() which returns a Collector w
 | mapToInt()  |  Returns an IntStream consisting of the results of applying the given function to the elements of this stream. |ToIntFunction | IntStream | | |
 | mapToLong()  |  Returns an LongStream consisting of the results of applying the given function to the elements of this stream. |ToLongFunction | LongStream | | |
 | mapToDouble()  |  Returns an DoubleStream consisting of the results of applying the given function to the elements of this stream. |ToDoubleFunction | DoubleStream | | |
+| boxed()  |   | |  | | |
 
 ## mapToInt
 Below is one way to create primitive data type stream
