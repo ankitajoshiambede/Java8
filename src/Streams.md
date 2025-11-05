@@ -1,36 +1,42 @@
-# Different ways to create stream
-1. From collection
-  ```
-List<Integer> salartList = Arrays.asList(3000000,4000000,2500000)
-Stream<Integer> streamFromList = salaryList.stream();
-  ```
+# Stream
+## Definiition
+Consider it as pipeline through which our collection elements passes through
 
-2. From Array
+## Use when
+* Use *for* loop when
+  * Dataset is very small because they don’t have the small overhead of building a Stream pipeline.
+  * Logic is simple and sequential
+  * Max control over iteration, index based access 
+ 
+* Use *stream()* when (even for small data)
+  * cleaner, declarative transformations, more functional style code
+  * value readability and maintainability
+  * when applying multiple transformations (filter -> map -> sort -> collect)
+  * to avoid mutable data structures or index based loops
+  * may later switch to parallel processing — it’s just .parallelStream() away.
 
-```
-Integer[] salaryArray = {3000000, 40000000, 25000000}
-Stream<Integer> streamFromArray = Arrays.stream(salaryArray);
-```
+* Use *parallelStream()* when
+  * Dataset is large (e.g., 100k+ elements)
+  * Each operation is CPU-intensive (not just I/O)
+  * Have multiple CPU cores
 
-3. From static method
+👉 Yes, you can use Stream API for small datasets.
+It’s not about size — it’s about code clarity, maintainability, and style.
 
-```
-Stream<Integer> streamFromStaticMethod = Stream.of(30000000, 25000000, 3500000)
-```
-4. From stream builder
-```
-Stream.Builder<Integer> streamBuilder = Stream.builder();
-streamBuilder.add(3000000);
-streamBuilder.add(25000000);
+## Stream and immutability
+- Streams encourage immutability — you create a new collection as output instead of mutating the original. The original collection remains unchanged. This makes stream operations safe, predictable, and thread-friendly.
 
-Stream<Integer> streamFromStreamBuilder = streamBuilder.build();
-```
+- When you run a stream pipeline, Java expects the source collection to remain unchanged during processing. If you modify it while streaming, you’ll usually get a ConcurrentModificationException or unexpected behavior.
+Why?
+  - The Stream internally uses an iterator.
+  - When you modify the list (add/remove) during iteration, the iterator detects that the structure changed → throws exception to prevent corruption.
 
-5. From stream Iterate
+✅ Safe Stream Practice
 
-```
-Stream<Integer> streamFromStreamIterate = Stream.iterate(1000000, (Integer n) -> n+ 10000000 ).limit(12000);
-```
+- Never modify the source collection during a stream.
+- Use .map() or .collect() to produce new immutable data.
+- If mutation is needed, do it after the stream finishes.
+- For debugging, use .peek() — but only for logging, not changing values.
 
 
 # Collectors class
@@ -78,8 +84,46 @@ Following are overloaded methods of groupingBy() which returns a Collector imple
 | groupingBy() |  implementing a cascaded "group by" operation on input elements, grouping elements according to a classification function, and then performing a reduction operation on the values associated with a given key using the specified downstream Collector. The Map produced by the Collector is created with the supplied factory function. | Function, Supplier, Collector | | stream().collect(groupingBy(Person::getCity, TreeMap::new,
                                               mapping(Person::getLastName, toSet())) |
 
+
+# Different ways to create stream
+1. From collection
+  ```
+List<Integer> salartList = Arrays.asList(3000000,4000000,2500000)
+Stream<Integer> streamFromList = salaryList.stream();
+  ```
+
+2. From Array
+
+```
+Integer[] salaryArray = {3000000, 40000000, 25000000}
+Stream<Integer> streamFromArray = Arrays.stream(salaryArray);
+```
+
+3. From static method
+
+```
+Stream<Integer> streamFromStaticMethod = Stream.of(30000000, 25000000, 3500000)
+```
+4. From stream builder
+```
+Stream.Builder<Integer> streamBuilder = Stream.builder();
+streamBuilder.add(3000000);
+streamBuilder.add(25000000);
+
+Stream<Integer> streamFromStreamBuilder = streamBuilder.build();
+```
+
+5. From stream Iterate
+
+```
+Stream<Integer> streamFromStreamIterate = Stream.iterate(1000000, (Integer n) -> n+ 10000000 ).limit(12000);
+```
+
+
 # Intermediate operations
-- We can chain multitple intermediate operations together 
+- We can chain multitple intermediate operations together
+- Intermediate operations in a Java stream are immutable and always create and return a new stream. 
+- Lazy in nature they gets executed only when terminal operation is invoked,  entire pipeline is not executed until a final result is requested.
 
 |  Operation | Description | Input | Return Type | Example|  Output|
 | ------------- | ------------- |------------- |------------- |-------------  |-------------  |
@@ -188,8 +232,44 @@ Internally it does:
 
 # Questions 
 - in Java 17 you can use .toList() instead of .collect(Collectors.toList()) on a stream, whats difference (??), difference in Collectors.toCollection() and Collectors.toList()
- .toList() guarantees the returned List is immutable. However, Collectors.toList() makes no promises about immutability. The result might be immutable. 
+ .toList() guarantees the returned List is immutable. However, Collectors.toList() makes no promises about immutability. The result might be immutable.
+
 I dint find in stream documentation toList method https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
 
+
 - Difference in Collectors.counting() and count() which one to use when
-- 
+- Difference between peek() and map()
+```
+class Person {
+    String name;
+    Person(String name) { this.name = name; }
+    public String toString() { return name; }
+}
+
+List<Person> people = new ArrayList<>(List.of(new Person("Ankita"), new Person("Raj")));
+
+people.stream()
+    .peek(p -> p.name = p.name.toUpperCase()) // ❌ mutating inside stream
+    .forEach(System.out::println);
+```
+
+
+Output:
+
+ANKITA
+RAJ
+
+
+It works — but it mutated the original objects!
+If another part of your code uses people, it will now see modified names.
+
+✅ Better way (Immutable Approach):
+```
+List<String> upperNames = people.stream()
+    .map(p -> p.name.toUpperCase()) // returns new values
+    .toList();
+
+System.out.println(upperNames); // [ANKITA, RAJ]
+```
+
+No mutation, safe and predictable.
