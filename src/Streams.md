@@ -1,6 +1,15 @@
 # Stream
-## Definiition
-Consider it as pipeline through which our collection elements passes through
+
+## Table of Content
+
+  - [Basic]()
+  - [Collectors class]()
+  - [Ways to create Stream]()
+  - [Intermediate Operations]()
+  - [Terminal Operations]()
+  - [Examples]()
+  - [Other Questions]()
+
 
 ## Use when
 * Use *for* loop when
@@ -23,20 +32,18 @@ Consider it as pipeline through which our collection elements passes through
 👉 Yes, you can use Stream API for small datasets.
 It’s not about size — it’s about code clarity, maintainability, and style.
 
-## Stream and immutability
-- Streams encourage immutability — you create a new collection as output instead of mutating the original. The original collection remains unchanged. This makes stream operations safe, predictable, and thread-friendly.
+## Definition
+- Consider it as pipeline through which our collection elements passes through.
+  
+- A stream pipeline consists of 
+1. a source( array, collection, generator function, I/O channel etc.)
+2. zero or more intermediate operations (transforms stream into another stream)
+3. terminal operation (produces result)
 
-- When you run a stream pipeline, Java expects the source collection to remain unchanged during processing. If you modify it while streaming, you’ll usually get a ConcurrentModificationException or unexpected behavior.
-Why?
-  - The Stream internally uses an iterator.
-  - When you modify the list (add/remove) during iteration, the iterator detects that the structure changed → throws exception to prevent corruption.
+- Streams are lazy; computation on the source data is only performed when the terminal operation is initiated, and source elements are consumed only as needed.
 
-✅ Safe Stream Practice
 
-- Never modify the source collection during a stream.
-- Use .map() or .collect() to produce new immutable data.
-- If mutation is needed, do it after the stream finishes.
-- For debugging, use .peek() — but only for logging, not changing values.
+
 
 
 # Collectors class
@@ -119,6 +126,7 @@ Stream<Integer> streamFromStreamBuilder = streamBuilder.build();
 Stream<Integer> streamFromStreamIterate = Stream.iterate(1000000, (Integer n) -> n+ 10000000 ).limit(12000);
 ```
 
+Provide limit() , or else it creates infinite stream.
 
 # Intermediate operations
 - We can chain multitple intermediate operations together
@@ -127,6 +135,7 @@ Stream<Integer> streamFromStreamIterate = Stream.iterate(1000000, (Integer n) ->
 
 |  Operation | Description | Input | Return Type | Example|  Output|
 | ------------- | ------------- |------------- |------------- |-------------  |-------------  |
+| stream() | Converts a collection into a stream |  |  |  |  |
 | filter()  | Filters the element  | Predicate | Stream |  stream.filter((String) name -> name.length >=5) | |
 | map()  | Transform each element | Function | Stream | stream.map((String) name -> name.toLowerCase())| |
 |  flatMap() |  Iterate over each element of complex collection(e.g. list of list), and helps to flatten it | Function |Stream |  stream.flatMap(List<String> sentence -> sentence.stream()); // given List<List<String>> stream and it returns Stream<String>| |
@@ -155,9 +164,40 @@ List<String> numbers = Arrays.asList("1", "3", "7", "12");
 IntStream integerStream = numbers.stream().mapToInt((String val) -> Integer.parseInt(val));
 ```
 
+## Difference between map() and flatMap()
+- map() transforms each element of the stream into another element. It is a one-to-one mapping.
+  - Use map() when you have a stream of elements and want to apply a function to each element.
+
+- flatMap() transforms + flattens the resulting streams into one stream, usually when dealing with collections of collections.
+  - Use flatMap() when each element can be mapped to zero or more elements (when dealing with nested collections)
+
+```
+
+        class Person {
+            String name;
+            List<String> colors;
+            Person(String name, List<String> colors) {
+                this.name = name;
+                this.colors = colors;
+            }
+            public String toString() { return name; }
+            public List<String> getColors() { return colors; }
+        }
+
+        List<Person> people = Arrays.asList(
+          new Person("Alice", Arrays.asList("Red","Blue")),
+          new    Person("Bob", Arrays.asList("Green","Yellow"))
+        );
+
+        List<List<String>> colorsListByMap = people.stream().map(Person::getColors).collect(Collectors.toList());
+        System.out.println(colorsListByMap);
+
+        List<String> colorsListByFlatMap = people.stream().flatMap(person -> person.getColors().stream()).collect(Collectors.toList());
+        System.out.println(colorsListByFlatMap);
+```
 # Terminal Operations
 - It triggers processing of stream
-- One terminal operation is used on a stream , it is closed/consumed and cannot be used again for other terminal operation
+- One terminal operation is used on a stream , it is closed/consumed and cannot be used again for other terminal operation, If stream is re-used it throws IllegalStateException
 
 |  Operation | Description | Input | Return Type | Example|    Output|
 | ------------- | ------------- |------------- |------------- |-------------  |-------------  |
@@ -226,6 +266,22 @@ Internally it does:
   ```
 ## reverseOrder() 
 
+## Stream and immutability
+- Streams encourage immutability — you create a new collection as output instead of mutating the original. The original collection remains unchanged. This makes stream operations safe, predictable, and thread-friendly.
+
+- When you run a stream pipeline, Java expects the source collection to remain unchanged during processing. If you modify it while streaming, you’ll usually get a ConcurrentModificationException or unexpected behavior.
+Why?
+  - The Stream internally uses an iterator.
+  - When you modify the list (add/remove) during iteration, the iterator detects that the structure changed → throws exception to prevent corruption.
+
+✅ Safe Stream Practice
+
+- Never modify the source collection during a stream.
+- Use .map() or .collect() to produce new immutable data.
+- If mutation is needed, do it after the stream finishes.
+- For debugging, use .peek() — but only for logging, not changing values.
+
+
 # Other
 - The chars() method is available on String, StringBuffer, and CharBuffer objects. This method returns an IntStream representing the Unicode code points of the characters within the sequence.
 
@@ -236,8 +292,10 @@ Internally it does:
 
 I dint find in stream documentation toList method https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
 
-
+---
 - Difference in Collectors.counting() and count() which one to use when
+
+---
 - Difference between peek() and map()
 ```
 class Person {
@@ -273,3 +331,40 @@ System.out.println(upperNames); // [ANKITA, RAJ]
 ```
 
 No mutation, safe and predictable.
+
+---
+## primitive stream vs normal stream
+In addition to Stream ( Stream of object references),  there are primitive specializations for IntStream, LongStream, and DoubleStream.
+
+- Primitive streams are generally more efficient for processing primitive data types as they avoid the overhead of autoboxing/unboxing.
+- Primitive streams offer specialized terminal operations like sum(), average(), max(), and min() which are tailored for numerical calculations.
+- While primitive streams can be collected into primitive arrays using toArray(), collecting them into standard Java collections (like List<Integer>) requires boxing them first.
+
+- Use primitve streams (*IntStream*, *LongStream*, *DoubleStream*) for heavy numeric work, since there is no boxing/unboxing, faster comutation and less memory usage, Use normal stream for object processing or when working with collections of complex data types.
+
+
+-Converting Between Normal and Primitive Streams
+To convert a Stream<WrapperType> (e.g., Stream<Integer>) to its corresponding primitive stream (IntStream), you use the mapTo methods:
+ - mapToInt(): Converts Stream<Integer> to IntStream.
+ - mapToLong(): Converts Stream<Long> to LongStream.
+ - mapToDouble(): Converts Stream<Double> to DoubleStream.
+
+```
+List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+IntStream intStream = numbers.stream().mapToInt(Integer::intValue);
+```
+
+- Converting a Primitive Stream to a Normal Stream:
+  use boxed() method: this method performs autoboxing, converting primitive values to their corresponding wrapper objects.
+
+```
+IntStream intStream = IntStream.of(1, 2, 3, 4, 5);
+Stream<Integer> integerStream = intStream.boxed();
+```
+
+---
+
+To generate stream of random numbers 
+```
+Stream.generate(Math::random).limit(10);
+```
