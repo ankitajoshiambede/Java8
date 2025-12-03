@@ -131,4 +131,149 @@ s->s.length()
 
 To invoke lambda expression , functional interface is required
 
+
+## @FunctionalInterface
+
 Runnable, Comparable, ActionListender, Callable are functional interface. All these interfaces contain single abstract method(SAM). An interface which contains SAM is functional interface.
+<br><br>
+Normal interface and Functional interface can contain any number of static and default method from 1.8, but functional interface should contain exactly one abstract method.
+<br><br>
+@FunctionalInterface annotation can be used to specify explicitly that interface is functional interface , if annotation is added and if more than one abstract method are defined then compiler will give error, but annotation is not mandatory. If interface contains exactly one abstract method then it is functional interface.
+
+- following is valid, since B contains only one abstract method inherited from interface A
+
+```
+@FunctionalInterface
+interface A{
+   public void m1();
+}
+
+@FunctionalInterface
+interface B extends A{
+}
+
+```
+
+- following is valid, since B overrides m1
+
+```
+@FunctionalInterface
+interface A{
+   public void m1();
+}
+
+@FunctionalInterface
+interface B extends A{
+   public void m1();
+}
+
+```
+
+- Following Functional Interface B is invalid since it contains two abstract method, one of its own and one overriden from interface A
+
+```
+@FunctionalInterface
+interface A{
+   public void m1();
+}
+
+@FunctionalInterface
+interface B extends A{
+   public void m2();
+}
+```
+
+- Following is valid , since B is normal interface it can contain any number of abstract methods
+
+
+```
+@FunctionalInterface
+interface A{
+   public void m1();
+}
+
+interface B extends A{
+   public void m2();
+}
+
+```
+
+## Lambda expression with Functional interface
+
+- Consider below interface and implementation of interface
+```
+interface DemoInterface{
+   public int m1();
+}
+
+class DemoClass extends DemoInterface{
+   public int m1(){
+      System.out.println("Hi...");
+   }
+}
+
+class Test{
+   public static void main(){
+      DemoInterface d = new DemoClass();
+      d.m1();
+   }
+}
+```
+
+We can implement functional interface with lambda expression as below, instead of creating DemoClass
+
+As we learnt above , we will convert implementation of m1 to lambda expression as follow
+```
+()->System.out.println("Hi...");
+```
+
+and implementation is called in Test class as follow
+```
+class Test{
+   public static void main(){
+      DemoInterface d = ()->System.out.println("Hi...");
+      d.m1();
+   }
+}
+```
+
+Consider follwing example
+
+```
+interface DemoAddInterface{
+   public int add(int a, int b);
+}
+
+class DemoClass extends DemoInterface{
+   public int add(int a, int b){
+      return a+b;
+   }
+}
+
+class Test{
+   public static void main(){
+      DemoInterface d = new DemoClass();
+      d.m1(10,20);
+   }
+}
+```
+
+We will convert add to lambda expression
+
+```
+interface DemoAddInterface{
+   public int add(int a, int b);
+}
+
+class Test{
+   public static void main(){
+      DemoInterface d = (a,b)->a+b;
+      d.m1(10,20);
+   }
+}
+```
+
+In above example since Functional interface contain exactly one abstract method, name of abstract method and data type of arguments passed to abstract method need not be written in lambda expression.
+
+Above will not affect performance since lambda expression are resolved one time during compilation.
+
