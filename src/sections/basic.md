@@ -1,4 +1,4 @@
-## Definitions
+ ## Definitions
 Functional programming is the art of composing programs with functions. This programming paradigm treats functions as “first-class citizens,” which in computer science means you can bind them to names, pass them as arguments, and return them from other functions just like any other data type.
 
 ## 1.8 version
@@ -463,3 +463,37 @@ Comparable and Comparator are Functional interfaces and we can use lambda expres
 ## Anonymous inner class and Lambda expression
 
 Anonymous inner class: class which does not have name
+Anonymous inner class can extend another class or implement interface
+In following example anonymous inner class extends thread class
+```
+        // Anonymous inner class extending a class (e.g., Thread)
+        Thread myThread = new Thread() {
+            @Override
+            public void run() {
+                System.out.println("Running from an anonymous thread.");
+            }
+        };
+```
+
+Following is another example of anonymous inner class, below creates implementation class of Runnable which doesnt have any name
+```
+Runnable r = new Runnable(){
+            public void run() {
+                System.out.println("Running from an anonymous thread.");
+            }
+};
+```
+
+we can replace above anonymous inner class with lambda expression
+```
+Runnable r = ()->{
+System.out.println("Running from an anonymous thread.");
+}
+```
+
+Anonymous inner class can be used for classes and also any interfaces but lambda expression used only for functional interface. 
+
+Anonymous Inner class != Lambda Expressions
+
+If anonymous Inner class implements an interface that contains single abstract method
+then only we can replace that anonymous inner class with lambda expressions
