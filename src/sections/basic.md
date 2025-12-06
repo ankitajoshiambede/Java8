@@ -491,9 +491,93 @@ System.out.println("Running from an anonymous thread.");
 }
 ```
 
-Anonymous inner class can be used for classes and also any interfaces but lambda expression used only for functional interface. 
+Anonymous inner class can extend a normal class, an abstract class , can implement interface which contain any number of abstract methods but lambda expression used only for functional interface. 
 
 Anonymous Inner class != Lambda Expressions
 
 If anonymous Inner class implements an interface that contains single abstract method
 then only we can replace that anonymous inner class with lambda expressions
+
+## Default methods
+Till 1.7 version, every method inside interface was public and abstract <br>
+From 1.8 version, defaults methods and static methods can be written inside functional interface <br>
+From 1.9 version, private methods inside interface are allowed <br>
+Every variable inside interface is public static and final.
+<br>
+
+- Default method is also called as Virtual extension method or defender method
+- Default methods were introduced to allow adding new methods to existing interfaces without breaking the classes that already implement them.
+- If an interface has 100 implementing classes and we add a new method to the interface, all 100 classes must be updated. To avoid modifying existing implementation classes when adding new methods, Java 8 introduced default methods. These allow us to add new methods to an interface with a default implementation, without affecting existing classes.
+- Default implememtation is provided.
+- Classes implementing interface can use default method as-is or can override them.
+- If a class implements two interfaces with the same default method, it must override and provide its own implementation.
+  <br> Consider follwing example
+```
+Interface I1{
+ default void m1(){ System.out.println("I1 method");}
+}
+
+Interface I2{
+ default void m1(){ System.out.println("I2 method");}
+}
+
+class Test implements I1, I2{
+ public void m1(){
+   //write own implementation or call any of interface default implementation e.g. I1.super.m1();
+   I1.super.m1();
+ }
+}
+```
+- Default methods cannot be synchronized, strictfp, or final.
+- Default methods can be static , but static methods cannot be overridden. They are called using InterfaceName.method(), this is only way to call interface static method.
+- Can default methods override methods from Object class? -> No. Methods like toString(), equals(), hashCode() cannot be declared as default.
+- From 1.9 version, default methods can be private.
+  <br>
+Example 1: Updating the Java Collections API
+
+Java 8 added methods like:
+
+forEach()
+
+stream()
+
+removeIf()
+
+sort() in List interface
+
+These were added as default methods, so old implementations (like ArrayList, LinkedList) didn’t break.
+
+- While overriding default method, public keyword must be used in overriden method. Default cannot be used in overriden method. Default is allowed only inside interface and not inside class
+- From 1.8 version, We can write main method (because its static method) inside interface
+- To Support Functional Programming and Stream API
+
+Java 8 introduced:
+
+Streams
+
+Lambda expressions
+
+Functional-style operations like forEach(), map(), filter()
+
+To integrate these features into existing interfaces (like Iterable, Collection, List), Java needed to add new methods such as:
+
+Iterable.forEach()
+
+Collection.stream()
+
+List.sort()
+
+If default methods didn’t exist, adding these would break thousands of existing classes (ArrayList, LinkedList, etc.).
+
+- Before Java 8, if an interface needed helper or utility methods (e.g., validation, common logic), programmers created separate utility classes like:
+
+Collections
+
+Arrays
+
+Math
+
+Java 8 allowed static methods inside interfaces so utility functions that belong to the interface can be kept inside the same interface.
+- Default methods are intended for object-level behavior.
+
+Static methods are intended for class-level or purely utility behavior.
