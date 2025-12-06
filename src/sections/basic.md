@@ -277,3 +277,189 @@ In above example since Functional interface contain exactly one abstract method,
 
 Above will not affect performance since lambda expression are resolved one time during compilation.
 
+### example
+consider following 
+```
+class MyRunnable implements Runnable{
+   public int run(){
+      for(int i = 0; i < 10; i++){
+         System.out.println("Child thread");
+      }
+   }
+}
+
+class Test{
+   public static void main(){
+      MyRunnable r = new MyRunnable();
+      Thread t = new Thread(r);
+      t.start();
+
+      for(int i = 0; i < 10; i++){
+         System.out.println("Parent thread");
+      }
+   }
+}
+```
+
+Converting above to lambda expression
+
+```
+class Test{
+   public static void main(){
+      MyRunnable r = ()->{
+         for(int i = 0; i < 10; i++){
+               System.out.println("Child thread");
+            }
+      };
+      Thread t = new Thread(r);
+      t.start();
+
+      for(int i = 0; i < 10; i++){
+         System.out.println("Parent thread");
+      }
+   }
+}
+```
+
+### example
+A Comparator in Java is an interface used to define custom sorting logic for objects. It is part of the java.util package.
+<br>
+Comparator has only one abstract method, so it can be used with lambda expressions.
+
+```
+@FunctionalInterface
+public interface Comparator<T> {
+    int compare(T o1, T o2);
+}
+```
+
+compare(T o1, T o2) method
+- Returns negative → o1 comes before o2
+- Returns zero → equal elements
+- Returns positive → o1 comes after o2
+
+ Consider the following example which sorts list in ascending order using comparator
+
+```
+class MyComparator implements Comparator<Integer>{
+   public int compare(Integer I1, Integer I2){
+      if(I1 < I2){
+         return -1;
+      }
+      if(I1 > I2){
+         return 1;
+      }
+      else{
+         return 0;
+      }
+   }
+}
+
+class Test{
+   public static void main(){
+      ArrayList<Integer> list = new ArrayList<Integer>();
+      l.add(10);
+      l.add(25);
+      l.add(20);
+      l.add(5);
+      l.add(87);
+      l.add(92);
+
+      Collections.sort(list, new MyComparator());
+      System.out.println("List in ascending order : "+ l);
+   }
+}
+```
+
+
+We will convert above in lambda expression as below 
+
+```
+class Test{
+   public static void main(){
+      ArrayList<Integer> list = new ArrayList<Integer>();
+      l.add(10);
+      l.add(25);
+      l.add(20);
+      l.add(5);
+      l.add(87);
+      l.add(92);
+      Comparator<Integer> lambdaComparator = (I1, I2)-> (I1 <I2) ? -1: (I1 > I2) ? 1:0;
+      Collections.sort(list, lambdaComparator);
+      System.out.println("List in ascending order : "+ l);
+   }
+}
+```
+
+### example
+Consider following example, we want to sort employee based on ascending order of employee number.
+
+```
+class Employee{
+   String name;
+   int eno;
+
+   Employee(String name, int no){
+      this.name = name;
+      this.eno = eno;
+   }
+
+   public String toString(){
+      return name+" "+eno;
+   }
+}
+
+class Test{
+   public static void main(){
+      ArrayList<Employee> empList = new ArrayList<>();
+      empList.add(new Employee("Ankita", 3));
+      empList.add(new Employee("Kiran", 1));
+      empList.add(new Employee("Aishwarya", 4));
+      empList.add(new Employee("Shubham", 2));
+      Collections.sort(empList, (e1, e2)-> (e1.eno < e2.eno) ? -1 : ((e1.eno > e2.eno) ? 1: 0));
+   }
+}
+```
+
+
+### example 
+Consider following example, we want to sort employee based on ascending alphabetical order of employee name.
+
+Comparing Strings Lexicographically (Alphabetical Order): compareTo()
+The compareTo() method compares two strings lexicographically (based on the Unicode value of each character). It returns:
+-  A negative integer if the calling string comes before the argument string.
+- Zero if the strings are equal.
+- A positive integer if the calling string comes after the argument string.
+  
+```
+class Employee{
+   String name;
+   int eno;
+
+   Employee(String name, int no){
+      this.name = name;
+      this.eno = eno;
+   }
+
+   public String toString(){
+      return name+" "+eno;
+   }
+}
+
+class Test{
+   public static void main(){
+      ArrayList<Employee> empList = new ArrayList<>();
+      empList.add(new Employee("Ankita", 3));
+      empList.add(new Employee("Kiran", 1));
+      empList.add(new Employee("Aishwarya", 4));
+      empList.add(new Employee("Shubham", 2));
+      Collections.sort(empList, (e1, e2)-> (e1.name.compareTo(e2.name);
+   }
+}
+```
+
+Comparable and Comparator are Functional interfaces and we can use lambda expression for sorting.
+
+## Anonymous inner class and Lambda expression
+
+Anonymous inner class: class which does not have name
